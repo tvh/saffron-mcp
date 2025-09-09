@@ -72,6 +72,12 @@ Restart Claude and you should see the MCP server tools after clicking on the ham
 
 ![MCP server running with Claude](docs/install.png)
 
+## Related Work
+
+- **[Paprika 3 MCP](https://github.com/soggycactus/paprika-3-mcp)** - An MCP server for Paprika 3 recipe management
+
+If you're working on similar MCP servers for cooking or recipe management, feel free to open an issue to have your project listed here!
+
 ## Disclaimer
 
 This project is not affiliated with or endorsed by Saffron. It provides client functionality that interacts with Saffron's publicly accessible API. Users are responsible for complying with Saffron's Terms of Service and applicable laws. Please use responsibly and respect rate limits.
