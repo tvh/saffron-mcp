@@ -85,24 +85,6 @@ export function registerRecipeTools(server: McpServer, client: SaffronClient) {
     }
   );
 
-  registerGraphQlTool<ImportRecipeFromTextMutation, ImportRecipeFromTextMutationVariables>(
-    server,
-    client,
-    {
-      name: "import_recipe_from_text",
-      description:
-        "Import a recipe from text. Returns the extracted recipe data that can then be used to create a new recipe through the createRecipe tool.",
-      document: ImportRecipeFromTextDocument,
-      inputSchema: { text: z.string() },
-      transformOutput: (output) => {
-        return {
-          ...output,
-          importRecipeFromText: formatRecipe(output.importRecipeFromText),
-        };
-      },
-    }
-  );
-
   // Recipe input schema for create and update operations
   const regularIngredientSchema = z.object({
     amount: z.string().optional(),

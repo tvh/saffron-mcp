@@ -26,10 +26,7 @@ This MCP server enables AI assistants to:
 - `get_recipe_by_id` - Get full recipe details by ID
 - `create_recipe` - Create a new recipe
 - `update_recipe` - Update an existing recipe
-
-### Recipe Import
 - `import_recipe_from_website` - Import recipe from a URL
-- `import_recipe_from_text` - Import recipe from text
 
 ### Meal Planning
 - `menu_planner` - Get all menu items and menu notes for a given date range
