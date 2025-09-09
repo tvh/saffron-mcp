@@ -1,10 +1,10 @@
 // Cookbook and section-related tools
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 import { z } from 'zod';
-import { registerGraphQlTool } from '../mcp.js';
+import { registerGraphQlTool } from '../mcp';
 import {
   SaffronClient,
-} from '../graphql.js';
+} from '../graphql';
 import { CookbooksDocument, CookbooksQuery, CookbooksQueryVariables, SectionsByCookbookIdDocument, SectionsByCookbookIdQuery, SectionsByCookbookIdQueryVariables } from '../generated/graphql.js';
 
 export function registerCookbookTools(server: McpServer, client: SaffronClient) {

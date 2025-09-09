@@ -1,15 +1,15 @@
 #!/usr/bin/env npx tsx
 
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio';
 import { Command } from 'commander';
 
 // Import from split files
-import { SaffronClient } from './graphql.js';
-import { createMcpServer } from './mcp.js';
-import { registerAccountTools } from './tools/account.js';
-import { registerCookbookTools } from './tools/cookbook.js';
-import { registerRecipeTools } from './tools/recipe.js';
-import { MeDocument, MeQuery, MeQueryVariables } from './generated/graphql.js';
+import { SaffronClient } from './graphql';
+import { createMcpServer } from './mcp';
+import { registerAccountTools } from './tools/account';
+import { registerCookbookTools } from './tools/cookbook';
+import { registerRecipeTools } from './tools/recipe';
+import { MeDocument, MeQuery, MeQueryVariables } from './generated/graphql';
 
 const client = new SaffronClient();
 

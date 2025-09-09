@@ -9,7 +9,7 @@ import * as os from 'os';
 // Import generated GraphQL operations
 import {
   LoginDocument,
-} from './generated/graphql.js';
+} from './generated/graphql';
 
 // Token storage utilities
 export interface TokenData {

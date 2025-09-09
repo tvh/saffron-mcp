@@ -1,12 +1,12 @@
 // Recipe-related tools
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { registerGraphQlTool } from '../mcp.js';
+import { registerGraphQlTool } from '../../mcp.js';
 import {
   SaffronClient,
-} from '../graphql.js';
-import { instructionsFromSlate, instructionsSchema } from '../instructions.js';
-import { RecipesByCookbookAndSectionIdDocument, RecipesByCookbookAndSectionIdQuery, RecipesByCookbookAndSectionIdQueryVariables, GetRecipeByIdDocument, GetRecipeByIdQuery, GetRecipeByIdQueryVariables, ImportRecipeFromWebsiteDocument, ImportRecipeFromWebsiteMutation, ImportRecipeFromWebsiteMutationVariables, ImportRecipeFromTextDocument, ImportRecipeFromTextMutation, ImportRecipeFromTextMutationVariables, CreateRecipeMutation, CreateRecipeMutationVariables, CreateRecipeDocument, UpdateRecipeMutation, UpdateRecipeMutationVariables, UpdateRecipeDocument, RecipeInputSchema, RegularIngredient } from '../generated/graphql.js';
+} from '../../graphql.js';
+import { instructionsFromSlate, instructionsSchema } from './instructions.js';
+import { RecipesByCookbookAndSectionIdDocument, RecipesByCookbookAndSectionIdQuery, RecipesByCookbookAndSectionIdQueryVariables, GetRecipeByIdDocument, GetRecipeByIdQuery, GetRecipeByIdQueryVariables, ImportRecipeFromWebsiteDocument, ImportRecipeFromWebsiteMutation, ImportRecipeFromWebsiteMutationVariables, ImportRecipeFromTextDocument, ImportRecipeFromTextMutation, ImportRecipeFromTextMutationVariables, CreateRecipeMutation, CreateRecipeMutationVariables, CreateRecipeDocument, UpdateRecipeMutation, UpdateRecipeMutationVariables, UpdateRecipeDocument, RecipeInputSchema, RegularIngredient } from '../../generated/graphql.js';
 
 export function registerRecipeTools(server: McpServer, client: SaffronClient) {
   registerGraphQlTool<RecipesByCookbookAndSectionIdQuery, RecipesByCookbookAndSectionIdQueryVariables>(
