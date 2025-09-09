@@ -5,9 +5,15 @@ import {
   CreateMenuItemsDocument,
   type CreateMenuItemsMutation,
   type CreateMenuItemsMutationVariables,
+  CreateMenuNoteDocument,
+  type CreateMenuNoteMutation,
+  type CreateMenuNoteMutationVariables,
   DeleteMenuItemsDocument,
   type DeleteMenuItemsMutation,
   type DeleteMenuItemsMutationVariables,
+  DeleteMenuNoteDocument,
+  type DeleteMenuNoteMutation,
+  type DeleteMenuNoteMutationVariables,
   MenuPlannerDocument,
   type MenuPlannerQuery,
   type MenuPlannerQueryVariables,
@@ -17,6 +23,10 @@ import {
   UpdateMenuItemDocument,
   type UpdateMenuItemMutation,
   type UpdateMenuItemMutationVariables,
+  UpdateMenuNoteDocument,
+  UpdateMenuNoteInput,
+  type UpdateMenuNoteMutation,
+  type UpdateMenuNoteMutationVariables,
 } from "../generated/graphql.js";
 import type { SaffronClient } from "../graphql.js";
 import { registerGraphQlTool } from "../mcp.js";
@@ -76,16 +86,12 @@ export async function registerMealPlanningTools(server: McpServer, client: Saffr
     })
   );
 
-  registerGraphQlTool<CreateMenuItemsMutation, CreateMenuItemsMutationVariables, any>(
-    server,
-    client,
-    {
-      name: "create_menu_items",
-      description: "Meal Planning: Create a new menu item",
-      document: CreateMenuItemsDocument,
-      inputSchema: { menuItems: z.array(menuItemInputSchema) },
-    }
-  );
+  registerGraphQlTool<CreateMenuItemsMutation, CreateMenuItemsMutationVariables, any>(server, client, {
+    name: "create_menu_items",
+    description: "Meal Planning: Create a new menu item",
+    document: CreateMenuItemsDocument,
+    inputSchema: { menuItems: z.array(menuItemInputSchema) },
+  });
 
   const menuItemUpdateInputSchema = z.intersection(
     sectionIdSchema,
@@ -99,21 +105,66 @@ export async function registerMealPlanningTools(server: McpServer, client: Saffr
     })
   );
 
-  registerGraphQlTool<UpdateMenuItemMutation, UpdateMenuItemMutationVariables, any>(
-    server,
-    client,
-    {
-      name: "update_menu_item",
-      description: "Meal Planning: Update a menu item",
-      document: UpdateMenuItemDocument,
-      inputSchema: { menuItem: menuItemUpdateInputSchema },
-    }
-  );
+  registerGraphQlTool<UpdateMenuItemMutation, UpdateMenuItemMutationVariables, any>(server, client, {
+    name: "update_menu_item",
+    description: "Meal Planning: Update a menu item",
+    document: UpdateMenuItemDocument,
+    inputSchema: { menuItem: menuItemUpdateInputSchema },
+  });
 
   registerGraphQlTool<DeleteMenuItemsMutation, DeleteMenuItemsMutationVariables>(server, client, {
     name: "delete_menu_item",
     description: "Meal Planning: Delete a menu item",
     document: DeleteMenuItemsDocument,
     inputSchema: { ids: z.array(z.string()).describe("The IDs of the menu items to delete") },
+  });
+
+  // Menu Notes CRUD operations
+  const menuNoteInputSchema = z.intersection(
+    sectionIdSchema,
+    z.object({
+      date: z.string().date(),
+      text: z.string().describe("The text content of the note"),
+    })
+  );
+
+  registerGraphQlTool<CreateMenuNoteMutation, CreateMenuNoteMutationVariables, any>(
+    server,
+    client,
+    {
+      name: "create_menu_note",
+      description: "Meal Planning: Create a new menu note",
+      document: CreateMenuNoteDocument,
+      inputSchema: { input: menuNoteInputSchema },
+    }
+  );
+
+  const menuNoteUpdateInputSchema = z.intersection(
+    sectionIdSchema.optional(),
+    z.object({
+      date: z.string().date().optional().describe("The new date of the menu note"),
+      text: z.string().optional().describe("The new text content of the note"),
+    })
+  );
+
+  registerGraphQlTool<UpdateMenuNoteMutation, UpdateMenuNoteMutationVariables, any>(
+    server,
+    client,
+    {
+      name: "update_menu_note",
+      description: "Meal Planning: Update a menu note",
+      document: UpdateMenuNoteDocument,
+      inputSchema: {
+        id: z.string(),
+        input: menuNoteUpdateInputSchema,
+      },
+    }
+  );
+
+  registerGraphQlTool<DeleteMenuNoteMutation, DeleteMenuNoteMutationVariables>(server, client, {
+    name: "delete_menu_note",
+    description: "Meal Planning: Delete a menu note",
+    document: DeleteMenuNoteDocument,
+    inputSchema: { id: z.string().describe("The ID of the menu note to delete") },
   });
 }
