@@ -25,7 +25,7 @@ import {
 } from "../../generated/graphql.js";
 import type { SaffronClient } from "../../graphql.js";
 import { registerGraphQlTool } from "../../mcp.js";
-import { Instruction, instructionsFromSlate, instructionsSchema } from "./instructions.js";
+import { type Instruction, instructionsFromSlate, instructionsSchema } from "./instructions.js";
 
 function formatRecipe<T extends { instructions: string }>(
   recipe: T
