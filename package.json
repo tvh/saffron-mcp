@@ -19,9 +19,16 @@
     "inspector": "npx @modelcontextprotocol/inspector",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
-    "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage"
+    "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint --write .",
+    "lint:check": "biome lint .",
+    "check": "biome check --write .",
+    "check:ci": "biome check ."
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.2.3",
     "@modelcontextprotocol/inspector": "^0.16.5",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.5",

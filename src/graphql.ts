@@ -1,15 +1,20 @@
 // GraphQL imports and client setup
-import { ApolloClient, InMemoryCache, HttpLink, NormalizedCacheObject, from } from '@apollo/client/core';
-import { setContext } from '@apollo/client/link/context';
-import * as cookie from 'cookie';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
+
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import {
+  ApolloClient,
+  from,
+  HttpLink,
+  InMemoryCache,
+  type NormalizedCacheObject,
+} from "@apollo/client/core";
+import { setContext } from "@apollo/client/link/context";
+import * as cookie from "cookie";
 
 // Import generated GraphQL operations
-import {
-  LoginDocument,
-} from './generated/graphql';
+import { LoginDocument } from "./generated/graphql";
 
 // Token storage utilities
 export interface TokenData {
@@ -23,18 +28,18 @@ export interface TokenStorage {
 
 export const getTokenFilePath = (): string => {
   const homeDir = os.homedir();
-  return path.join(homeDir, '.saffron-tokens.json');
+  return path.join(homeDir, ".saffron-tokens.json");
 };
 
 export const loadTokens = (): TokenStorage => {
   try {
     const tokenFilePath = getTokenFilePath();
     if (fs.existsSync(tokenFilePath)) {
-      const data = fs.readFileSync(tokenFilePath, 'utf8');
+      const data = fs.readFileSync(tokenFilePath, "utf8");
       return JSON.parse(data);
     }
   } catch (error) {
-    console.error('Error loading tokens:', error);
+    console.error("Error loading tokens:", error);
   }
   return {};
 };
@@ -44,7 +49,7 @@ export const saveTokens = (tokens: TokenStorage): void => {
     const tokenFilePath = getTokenFilePath();
     fs.writeFileSync(tokenFilePath, JSON.stringify(tokens, null, 2));
   } catch (error) {
-    console.error('Error saving tokens:', error);
+    console.error("Error saving tokens:", error);
   }
 };
 
@@ -85,40 +90,41 @@ export class SaffronClient {
     // Context link to set headers (including dynamic cookie)
     const authLink = setContext((_, { headers }) => {
       // Build cookie header from stored cookies
-      const cookieHeader = Object.keys(this.cookies).length > 0
-        ? Object.entries(this.cookies)
-          .map(([name, value]) => `${name}=${value}`)
-          .join('; ')
-        : undefined;
+      const cookieHeader =
+        Object.keys(this.cookies).length > 0
+          ? Object.entries(this.cookies)
+              .map(([name, value]) => `${name}=${value}`)
+              .join("; ")
+          : undefined;
 
       return {
         headers: {
           ...headers,
-          'content-type': 'application/json',
-          'x-app-version': '1.4.109',
-          'x-platform': 'main-web',
-          'Origin': 'https://www.mysaffronapp.com',
-          'Referer': 'https://www.mysaffronapp.com/',
-          ...(cookieHeader && { 'Cookie': cookieHeader }),
-        }
+          "content-type": "application/json",
+          "x-app-version": "1.4.109",
+          "x-platform": "main-web",
+          Origin: "https://www.mysaffronapp.com",
+          Referer: "https://www.mysaffronapp.com/",
+          ...(cookieHeader && { Cookie: cookieHeader }),
+        },
       };
     });
 
     // Custom HTTP link that can access response headers
     const httpLink = new HttpLink({
-      uri: 'https://prod.mysaffronapp.com/graphql',
+      uri: "https://prod.mysaffronapp.com/graphql",
       fetch: async (uri, options) => {
         const response = await fetch(uri, options);
 
         // Extract and parse cookies from response headers
-        const setCookieHeader = response.headers.get('set-cookie');
+        const setCookieHeader = response.headers.get("set-cookie");
         if (setCookieHeader) {
-          console.error('Received set-cookie:', setCookieHeader);
+          console.error("Received set-cookie:", setCookieHeader);
 
           // Parse the set-cookie header using the cookie library
           try {
             // Extract just the name=value part (before the first semicolon)
-            const cookiePart = setCookieHeader.split(';')[0];
+            const cookiePart = setCookieHeader.split(";")[0];
             if (cookiePart) {
               const parsed = cookie.parse(cookiePart);
               let cookiesUpdated = false;
@@ -137,12 +143,12 @@ export class SaffronClient {
               }
             }
           } catch (error) {
-            console.error('Error parsing cookie:', error);
+            console.error("Error parsing cookie:", error);
           }
         }
 
         return response;
-      }
+      },
     });
 
     this.client = new ApolloClient({
@@ -172,8 +178,8 @@ export class SaffronClient {
 
     // Note: Tokens are now automatically saved in the fetch function when set-cookie headers are received
 
-    console.error('Login result:', JSON.stringify(result, null, 2));
-    console.error('Cookies after login:', this.cookies);
+    console.error("Login result:", JSON.stringify(result, null, 2));
+    console.error("Cookies after login:", this.cookies);
 
     return result;
   }
