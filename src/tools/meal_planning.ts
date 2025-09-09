@@ -51,7 +51,7 @@ export async function registerMealPlanningTools(server: McpServer, client: Saffr
 
   registerGraphQlTool<MenuPlannerQuery, MenuPlannerQueryVariables>(server, client, {
     name: "menu_planner",
-    description: "Get all menu items and menu notes for a given date range",
+    description: "Meal Planning: Get all menu items and menu notes for a given date range",
     document: MenuPlannerDocument,
     inputSchema: {
       startDate: z.string().date(),
@@ -81,7 +81,7 @@ export async function registerMealPlanningTools(server: McpServer, client: Saffr
     client,
     {
       name: "create_menu_items",
-      description: "Create a new menu item",
+      description: "Meal Planning: Create a new menu item",
       document: CreateMenuItemsDocument,
       inputSchema: { menuItems: z.array(menuItemInputSchema) },
     }
@@ -104,7 +104,7 @@ export async function registerMealPlanningTools(server: McpServer, client: Saffr
     client,
     {
       name: "update_menu_item",
-      description: "Update a menu item",
+      description: "Meal Planning: Update a menu item",
       document: UpdateMenuItemDocument,
       inputSchema: { menuItem: menuItemUpdateInputSchema },
     }
@@ -112,7 +112,7 @@ export async function registerMealPlanningTools(server: McpServer, client: Saffr
 
   registerGraphQlTool<DeleteMenuItemsMutation, DeleteMenuItemsMutationVariables>(server, client, {
     name: "delete_menu_item",
-    description: "Delete a menu item",
+    description: "Meal Planning: Delete a menu item",
     document: DeleteMenuItemsDocument,
     inputSchema: { ids: z.array(z.string()).describe("The IDs of the menu items to delete") },
   });
