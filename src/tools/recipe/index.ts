@@ -25,7 +25,14 @@ import {
 } from "../../generated/graphql.js";
 import type { SaffronClient } from "../../graphql.js";
 import { registerGraphQlTool } from "../../mcp.js";
-import { instructionsFromSlate, instructionsSchema } from "./instructions.js";
+import { Instruction, instructionsFromSlate, instructionsSchema } from "./instructions.js";
+
+function formatRecipe<T extends {"instructions": string}>(recipe: T): Omit<T, "instructions"> & { instructions: Instruction[] } {
+  return {
+    ...recipe,
+    instructions: instructionsFromSlate(recipe.instructions),
+  };
+}
 
 export function registerRecipeTools(server: McpServer, client: SaffronClient) {
   registerGraphQlTool<
@@ -53,10 +60,7 @@ export function registerRecipeTools(server: McpServer, client: SaffronClient) {
     transformOutput: (output) => {
       return {
         ...output,
-        getRecipeById: output.getRecipeById && {
-          ...output.getRecipeById,
-          instructions: instructionsFromSlate(output.getRecipeById.instructions),
-        },
+        getRecipeById: output.getRecipeById && formatRecipe(output.getRecipeById),
       };
     },
   });
@@ -73,10 +77,7 @@ export function registerRecipeTools(server: McpServer, client: SaffronClient) {
       transformOutput: (output) => {
         return {
           ...output,
-          importRecipeFromWebsite: {
-            ...output.importRecipeFromWebsite,
-            instructions: instructionsFromSlate(output.importRecipeFromWebsite.instructions),
-          },
+          importRecipeFromWebsite: formatRecipe(output.importRecipeFromWebsite),
         };
       },
     }
@@ -94,10 +95,7 @@ export function registerRecipeTools(server: McpServer, client: SaffronClient) {
       transformOutput: (output) => {
         return {
           ...output,
-          importRecipeFromText: {
-            ...output.importRecipeFromText,
-            instructions: instructionsFromSlate(output.importRecipeFromText.instructions),
-          },
+          importRecipeFromText: formatRecipe(output.importRecipeFromText),
         };
       },
     }
@@ -144,10 +142,7 @@ export function registerRecipeTools(server: McpServer, client: SaffronClient) {
           ...output,
           createRecipe: {
             ...output.createRecipe,
-            recipe: output.createRecipe.recipe && {
-              ...output.createRecipe.recipe,
-              instructions: instructionsFromSlate(output.createRecipe.recipe.instructions),
-            },
+            recipe: output.createRecipe.recipe && formatRecipe(output.createRecipe.recipe),
           },
         };
       },
@@ -168,10 +163,7 @@ export function registerRecipeTools(server: McpServer, client: SaffronClient) {
         ...output,
         updateRecipe: {
           ...output.updateRecipe,
-          recipe: output.updateRecipe.recipe && {
-            ...output.updateRecipe.recipe,
-            instructions: instructionsFromSlate(output.updateRecipe.recipe.instructions),
-          },
+          recipe: output.updateRecipe.recipe && formatRecipe(output.updateRecipe.recipe),
         },
       };
     },
