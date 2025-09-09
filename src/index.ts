@@ -8,17 +8,13 @@ import { SaffronClient } from "./graphql";
 import { createMcpServer } from "./mcp";
 import { registerAccountTools } from "./tools/account";
 import { registerCookbookTools } from "./tools/cookbook";
+import { registerMealPlanningTools } from "./tools/meal_planning";
 import { registerRecipeTools } from "./tools/recipe";
 
 const client = new SaffronClient();
 
 // Create MCP server
 const server = createMcpServer();
-
-// Register all tools
-registerAccountTools(server, client);
-registerCookbookTools(server, client);
-registerRecipeTools(server, client);
 
 // Command line interface setup
 const program = new Command();
@@ -73,6 +69,12 @@ async function main() {
     });
     console.error("Me:", JSON.stringify(me, null, 2));
   }
+
+  // Register all tools
+  registerAccountTools(server, client);
+  registerCookbookTools(server, client);
+  registerRecipeTools(server, client);
+  await registerMealPlanningTools(server, client);
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

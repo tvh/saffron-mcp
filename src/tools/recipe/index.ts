@@ -27,7 +27,9 @@ import type { SaffronClient } from "../../graphql.js";
 import { registerGraphQlTool } from "../../mcp.js";
 import { Instruction, instructionsFromSlate, instructionsSchema } from "./instructions.js";
 
-function formatRecipe<T extends {"instructions": string}>(recipe: T): Omit<T, "instructions"> & { instructions: Instruction[] } {
+function formatRecipe<T extends { instructions: string }>(
+  recipe: T
+): Omit<T, "instructions"> & { instructions: Instruction[] } {
   return {
     ...recipe,
     instructions: instructionsFromSlate(recipe.instructions),
