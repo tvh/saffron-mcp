@@ -87,10 +87,13 @@ export async function registerMealPlanningTools(server: McpServer, client: Saffr
   );
 
   registerGraphQlTool<CreateMenuItemsMutation, CreateMenuItemsMutationVariables, any>(server, client, {
-    name: "create_menu_items",
+    name: "create_menu_item",
     description: "Meal Planning: Create a new menu item",
     document: CreateMenuItemsDocument,
-    inputSchema: { menuItems: z.array(menuItemInputSchema) },
+    inputSchema: {
+        // NOTE: We want to only create one menu item at a time.
+        // The API suggests we could do multiple at once, but it results in a `not authorized` error.
+        menuItems: menuItemInputSchema.transform((input) => [input]) },
   });
 
   const menuItemUpdateInputSchema = z.intersection(
@@ -116,7 +119,11 @@ export async function registerMealPlanningTools(server: McpServer, client: Saffr
     name: "delete_menu_item",
     description: "Meal Planning: Delete a menu item",
     document: DeleteMenuItemsDocument,
-    inputSchema: { ids: z.array(z.string()).describe("The IDs of the menu items to delete") },
+    inputSchema: { 
+        // NOTE: We want to only delete one menu item at a time.
+        // The API suggests we could do multiple at once, but it results in a `not authorized` error.
+        ids: z.string().describe("The ID of the menu item to delete").transform((input) => [input])
+    },
   });
 
   // Menu Notes CRUD operations
