@@ -45,7 +45,7 @@ import {
   RegularIngredient,
 } from './generated/graphql.js';
 import { instructionsFromSlate, instructionsSchema } from './instructions.js';
-import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { CallToolResult, ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
 
 // Token storage utilities
 interface TokenData {
@@ -96,7 +96,7 @@ const saveTokenForEmail = (email: string, cookies: { [key: string]: string }): v
 const loadTokenForEmail = (email: string): { [key: string]: string } | null => {
   const tokens = loadTokens();
   const tokenData = tokens[email];
-  
+
   if (tokenData) {
     // Check if token is less than 30 days old
     const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
@@ -108,7 +108,7 @@ const loadTokenForEmail = (email: string): { [key: string]: string } | null => {
       saveTokens(tokens);
     }
   }
-  
+
   return null;
 };
 
@@ -165,7 +165,7 @@ class SaffronClient {
                   cookiesUpdated = true;
                 }
               });
-              
+
               // Always save updated cookies to file if we have a current email
               if (cookiesUpdated && this.currentEmail) {
                 saveTokenForEmail(this.currentEmail, this.cookies);
@@ -200,7 +200,7 @@ class SaffronClient {
 
   async login(email: string, password: string) {
     this.currentEmail = email;
-    
+
     const result = await this.client.mutate({
       mutation: LoginDocument,
       variables: { input: { email, password } },
@@ -240,12 +240,26 @@ const server = new McpServer(
 );
 
 // Helper function to register GraphQL-based MCP tools
-function registerGraphQlTool<TData, TVariables extends OperationVariables, TInput extends {[key in keyof TVariables]: any} = TVariables>(
-  name: string,
-  description: string,
-  document: TypedDocumentNode<TData, TVariables>,
-  inputSchema: { [K in keyof TVariables]: z.ZodType<TVariables[K], z.ZodTypeDef, TInput[K]> },
-  transformOutput?: (output: TData) => unknown,
+function registerGraphQlTool<TData, TVariables extends OperationVariables, TInput extends { [key in keyof TVariables]: any } = TVariables>(
+  {
+    name,
+    description,
+    document,
+    inputSchema,
+    transformOutput,
+    annotations,
+  }: {
+    name: string;
+    description: string;
+    document: TypedDocumentNode<TData, TVariables>;
+    inputSchema: {
+      [K in keyof TVariables]: z.ZodType<TVariables[K], z.ZodTypeDef, TInput[K]>;
+    };
+    transformOutput?: (output: TData) => unknown;
+    annotations?: ToolAnnotations & {
+      title: string;
+    };
+  },
 ) {
   let isQuery = true;
   for (const definition of document.definitions) {
@@ -260,6 +274,7 @@ function registerGraphQlTool<TData, TVariables extends OperationVariables, TInpu
     {
       description,
       inputSchema,
+      annotations,
     },
     // @ts-expect-error
     (async (variablesRaw, extra): Promise<CallToolResult> => {
@@ -323,78 +338,60 @@ function registerGraphQlTool<TData, TVariables extends OperationVariables, TInpu
 }
 
 registerGraphQlTool<MeQuery, MeQueryVariables>(
-  'me',
-  'Get your user information',
-  MeDocument,
-  {},
+  { name: 'me', description: 'Get your user information', document: MeDocument, inputSchema: {} },
 );
 
 registerGraphQlTool<CookbooksQuery, CookbooksQueryVariables>(
-  'cookbooks',
-  'Get your cookbooks',
-  CookbooksDocument,
-  {},
+  { name: 'cookbooks', description: 'Get your cookbooks', document: CookbooksDocument, inputSchema: {} },
 );
 
 registerGraphQlTool<SectionsByCookbookIdQuery, SectionsByCookbookIdQueryVariables>(
-  'sections_by_cookbook_id',
-  'Get sections by cookbook ID. CookbookIds are globally unique and can be found through the cookbooks tool.',
-  SectionsByCookbookIdDocument,
-  { cookbookId: z.string().describe('The ID of the cookbook to get sections for. Get this using the cookbooks tool.') },
+  { name: 'sections_by_cookbook_id', description: 'Get sections by cookbook ID. CookbookIds are globally unique and can be found through the cookbooks tool.', document: SectionsByCookbookIdDocument, inputSchema: { cookbookId: z.string().describe('The ID of the cookbook to get sections for. Get this using the cookbooks tool.') } },
 );
 
 registerGraphQlTool<RecipesByCookbookAndSectionIdQuery, RecipesByCookbookAndSectionIdQueryVariables>(
-  'recipes_by_cookbook_and_section_id',
-  'Get short summary of recipes by cookbook and section ID. SectionIds are globally unique and can be found through the sections_by_cookbook_id tool.',
-  RecipesByCookbookAndSectionIdDocument,
-  { sectionId: z.string().describe('The ID of the section to get recipes for. Get this using the sections_by_cookbook_id tool.') },
+  { name: 'recipes_by_cookbook_and_section_id', description: 'Get short summary of recipes by cookbook and section ID. SectionIds are globally unique and can be found through the sections_by_cookbook_id tool.', document: RecipesByCookbookAndSectionIdDocument, inputSchema: { sectionId: z.string().describe('The ID of the section to get recipes for. Get this using the sections_by_cookbook_id tool.') } },
 );
 
 registerGraphQlTool<GetRecipeByIdQuery, GetRecipeByIdQueryVariables>(
-  'get_recipe_by_id',
-  'Get the full recipe by its ID',
-  GetRecipeByIdDocument,
-  { id: z.string() },
-  (output) => {
-    return {
-      ...output,
-      getRecipeById: output.getRecipeById && {
-        ...output.getRecipeById,
-        instructions:  instructionsFromSlate(output.getRecipeById.instructions),
-      },
-    };
+  {
+    name: 'get_recipe_by_id', description: 'Get the full recipe by its ID', document: GetRecipeByIdDocument, inputSchema: { id: z.string() }, transformOutput: (output) => {
+      return {
+        ...output,
+        getRecipeById: output.getRecipeById && {
+          ...output.getRecipeById,
+          instructions: instructionsFromSlate(output.getRecipeById.instructions),
+        },
+      };
+    }
   },
 );
 
 registerGraphQlTool<ImportRecipeFromWebsiteMutation, ImportRecipeFromWebsiteMutationVariables>(
-  'import_recipe_from_website',
-  'Import a recipe from a website. Returns the extracted recipe data that can then be used to create a new recipe through the createRecipe tool.',
-  ImportRecipeFromWebsiteDocument,
-  { url: z.string() },
-  (output) => {
-    return {
-      ...output,
-      importRecipeFromWebsite: {
-        ...output.importRecipeFromWebsite,
-        instructions: instructionsFromSlate(output.importRecipeFromWebsite.instructions),
-      },
-    };
+  {
+    name: 'import_recipe_from_website', description: 'Import a recipe from a website. Returns the extracted recipe data that can then be used to create a new recipe through the createRecipe tool.', document: ImportRecipeFromWebsiteDocument, inputSchema: { url: z.string() }, transformOutput: (output) => {
+      return {
+        ...output,
+        importRecipeFromWebsite: {
+          ...output.importRecipeFromWebsite,
+          instructions: instructionsFromSlate(output.importRecipeFromWebsite.instructions),
+        },
+      };
+    }
   },
 );
 
 registerGraphQlTool<ImportRecipeFromTextMutation, ImportRecipeFromTextMutationVariables>(
-  'import_recipe_from_text',
-  'Import a recipe from text. Returns the extracted recipe data that can then be used to create a new recipe through the createRecipe tool.',
-  ImportRecipeFromTextDocument,
-  { text: z.string() },
-  (output) => {
-    return {
-      ...output,
-      importRecipeFromText: {
-        ...output.importRecipeFromText,
-        instructions: instructionsFromSlate(output.importRecipeFromText.instructions),
-      },
-    };
+  {
+    name: 'import_recipe_from_text', description: 'Import a recipe from text. Returns the extracted recipe data that can then be used to create a new recipe through the createRecipe tool.', document: ImportRecipeFromTextDocument, inputSchema: { text: z.string() }, transformOutput: (output) => {
+      return {
+        ...output,
+        importRecipeFromText: {
+          ...output.importRecipeFromText,
+          instructions: instructionsFromSlate(output.importRecipeFromText.instructions),
+        },
+      };
+    }
   },
 );
 
@@ -406,7 +403,7 @@ const regularIngredientSchema = z.object({
 });
 
 const ingredientsSchema: z.ZodType<string, z.ZodTypeDef, (Omit<RegularIngredient, '__typename'>)[]> = z.array(regularIngredientSchema).transform<string>(
-  xs => JSON.stringify(xs.map(x => ({...x, __typename: "RegularIngredient"}))));
+  xs => JSON.stringify(xs.map(x => ({ ...x, __typename: "RegularIngredient" }))));
 
 const recipeInputSchema = z.object({
   ...RecipeInputSchema().shape,
@@ -416,40 +413,36 @@ const recipeInputSchema = z.object({
 });
 type RecipeInput = z.baseObjectInputType<typeof recipeInputSchema.shape>;
 
-registerGraphQlTool<CreateRecipeMutation, CreateRecipeMutationVariables, {recipe: RecipeInput}>(
-  'create_recipe',
-  'Create a new recipe',
-  CreateRecipeDocument,
-  { recipe: recipeInputSchema },
-  (output) => {
-    return {
-      ...output,
-      createRecipe: { 
-        ...output.createRecipe,
-        recipe: output.createRecipe.recipe && {
-          ...output.createRecipe.recipe,
-          instructions: instructionsFromSlate(output.createRecipe.recipe.instructions),
+registerGraphQlTool<CreateRecipeMutation, CreateRecipeMutationVariables, { recipe: RecipeInput }>(
+  {
+    name: 'create_recipe', description: 'Create a new recipe', document: CreateRecipeDocument, inputSchema: { recipe: recipeInputSchema }, transformOutput: (output) => {
+      return {
+        ...output,
+        createRecipe: {
+          ...output.createRecipe,
+          recipe: output.createRecipe.recipe && {
+            ...output.createRecipe.recipe,
+            instructions: instructionsFromSlate(output.createRecipe.recipe.instructions),
+          },
         },
-      },
+      };
     }
   },
 );
 
-registerGraphQlTool<UpdateRecipeMutation, UpdateRecipeMutationVariables, {id: string, recipe: RecipeInput}>(
-  'update_recipe',
-  'Update an existing recipe',
-  UpdateRecipeDocument,
-  { id: z.string(), recipe: recipeInputSchema },
-  (output) => {
-    return {
-      ...output,
-      updateRecipe: {
-        ...output.updateRecipe,
-        recipe: output.updateRecipe.recipe && {
-          ...output.updateRecipe.recipe,
-          instructions: instructionsFromSlate(output.updateRecipe.recipe.instructions),
+registerGraphQlTool<UpdateRecipeMutation, UpdateRecipeMutationVariables, { id: string, recipe: RecipeInput }>(
+  {
+    name: 'update_recipe', description: 'Update an existing recipe', document: UpdateRecipeDocument, inputSchema: { id: z.string(), recipe: recipeInputSchema }, transformOutput: (output) => {
+      return {
+        ...output,
+        updateRecipe: {
+          ...output.updateRecipe,
+          recipe: output.updateRecipe.recipe && {
+            ...output.updateRecipe.recipe,
+            instructions: instructionsFromSlate(output.updateRecipe.recipe.instructions),
+          },
         },
-      },
+      };
     }
   },
 );
@@ -473,7 +466,7 @@ interface CliOptions {
 // Start the server
 async function main() {
   const options = program.opts<CliOptions>();
-  
+
   // Try to load saved tokens first
   let authenticated = false;
   if (client.loadTokensForEmail(options.email)) {
@@ -490,14 +483,14 @@ async function main() {
       console.error('Saved tokens are invalid, will need to login with password');
     }
   }
-  
+
   // If not authenticated with saved tokens, try password login
   if (!authenticated) {
     if (!options.password) {
       console.error('No saved tokens found and no password provided. Please provide a password with -p or --password');
       process.exit(1);
     }
-    
+
     await client.login(options.email, options.password);
     const me = await client.client.query<MeQuery, MeQueryVariables>({
       query: MeDocument,
