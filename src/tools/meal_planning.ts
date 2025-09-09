@@ -133,7 +133,7 @@ export async function registerMealPlanningTools(server: McpServer, client: Saffr
     client,
     {
       name: "create_menu_note",
-      description: "Meal Planning: Create a new menu note",
+      description: "Meal Planning: Create a new menu note. A note can be an informal/family recipe, a note to yourself about the meal plan, etc.",
       document: CreateMenuNoteDocument,
       inputSchema: { input: menuNoteInputSchema },
     }
