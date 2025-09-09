@@ -1,4 +1,4 @@
-# Saffron MCP Server
+# <img src="docs/saffron.png" alt="🧄" width="24" height="24" style="vertical-align: middle;"> Saffron MCP Server
 
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides AI assistants with access to [Saffron](https://www.mysaffronapp.com) recipe management functionality.
 
