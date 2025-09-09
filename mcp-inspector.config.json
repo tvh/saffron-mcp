@@ -1,0 +1,8 @@
+{
+  "serverCommand": ["tsx", "src/index.ts"],
+  "promptForCredentials": true,
+  "credentialsMapping": {
+    "username": "--email",
+    "password": "--password"
+  }
+}
