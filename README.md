@@ -43,6 +43,21 @@ This MCP server enables AI assistants to:
 - `update_menu_note` - Update an existing menu note
 - `delete_menu_note` - Delete a menu note
 
+## Installation
+
+To use this MCP server, you'll need:
+
+- Node.js (version 14 or higher)
+- npm/npx (comes with Node.js)
+
+Clone the repository:
+
+```bash
+git clone https://github.com/tvh/saffron-mcp.git
+cd saffron-mcp
+npm install
+```
+
 ## 🤖 Setting up Claude
 
 If you haven't setup MCP before, [first read more about how to install Claude Desktop client & configure an MCP server.](https://modelcontextprotocol.io/quickstart/user)
