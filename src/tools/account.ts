@@ -8,6 +8,6 @@ export function registerAccountTools(server: McpServer, client: SaffronClient) {
   registerGraphQlTool<MeQuery, MeQueryVariables>(
     server,
     client,
-    { name: 'me', description: 'Get your user information', document: MeDocument, inputSchema: {} },
+    { name: 'me', description: 'Get your user information (name, email, subscription status, etc.)', document: MeDocument, inputSchema: {} },
   );
 }
