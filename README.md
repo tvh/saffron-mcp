@@ -2,6 +2,12 @@
 
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides AI assistants with access to [Saffron](https://www.mysaffronapp.com) recipe management functionality.
 
+## Example: Claude using the Saffron MCP server
+
+<p align="center">
+  <img src="docs/example.png" alt="MCP server running with Claude" />
+</p>
+
 ## Features
 
 This MCP server enables AI assistants to:
@@ -36,6 +42,35 @@ This MCP server enables AI assistants to:
 - `create_menu_note` - Create a new menu note (informal recipes, meal planning notes)
 - `update_menu_note` - Update an existing menu note
 - `delete_menu_note` - Delete a menu note
+
+## 🤖 Setting up Claude
+
+If you haven't setup MCP before, [first read more about how to install Claude Desktop client & configure an MCP server.](https://modelcontextprotocol.io/quickstart/user)
+
+To add `saffron-mcp` to Claude, all you need to do is create another entry in the `mcpServers` section of your `claude_desktop_config.json` file:
+
+```json
+{
+  "mcpServers": {
+    "saffron": {
+      "key": "saffron",
+      "command": "npx",
+      "args": [
+        "tsx",
+        "/path/to/saffron-mcp/src/index.ts",
+        "--email",
+        "<your email>",
+        "--password",
+        "<your password>"
+      ]
+    }
+  }
+}
+```
+
+Restart Claude and you should see the MCP server tools after clicking on the hammerhead icon:
+
+![MCP server running with Claude](docs/install.png)
 
 ## Disclaimer
 
