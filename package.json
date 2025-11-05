@@ -57,6 +57,7 @@
     "@graphql-codegen/typescript": "^4.1.6",
     "@graphql-codegen/typescript-operations": "^4.6.1",
     "@modelcontextprotocol/sdk": "^1.17.3",
+    "apollo-upload-client": "^18.0.1",
     "commander": "^14.0.0",
     "cookie": "^1.0.2",
     "graphql": "^16.11.0",
