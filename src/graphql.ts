@@ -6,11 +6,11 @@ import * as path from "node:path";
 import {
   ApolloClient,
   from,
-  HttpLink,
   InMemoryCache,
   type NormalizedCacheObject,
 } from "@apollo/client/core";
 import { setContext } from "@apollo/client/link/context";
+import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 import * as cookie from "cookie";
 
 // Import generated GraphQL operations
@@ -110,10 +110,10 @@ export class SaffronClient {
       };
     });
 
-    // Custom HTTP link that can access response headers
-    const httpLink = new HttpLink({
+    // Custom upload link that can access response headers and handle file uploads
+    const uploadLink = createUploadLink({
       uri: "https://prod.mysaffronapp.com/graphql",
-      fetch: async (uri, options) => {
+      fetch: async (uri: RequestInfo | URL, options?: RequestInit) => {
         const response = await fetch(uri, options);
 
         // Extract and parse cookies from response headers
@@ -152,7 +152,7 @@ export class SaffronClient {
     });
 
     this.client = new ApolloClient({
-      link: from([authLink, httpLink]),
+      link: from([authLink, uploadLink]),
       cache: new InMemoryCache(),
     });
   }

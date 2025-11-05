@@ -32,6 +32,7 @@
     "@modelcontextprotocol/inspector": "^0.16.5",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.5",
+    "@types/apollo-upload-client": "^19.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.9.0",
     "@types/slate-legacy": "npm:@types/slate@^0.47.16",
